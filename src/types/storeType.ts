@@ -13,6 +13,13 @@ export interface IPersonConfig {
     prizeName: string[];
     prizeId: string[];
     prizeTime: string[];
+    prizeGroupId: string
+    prizeGroupName: string
+    voteCount: number
+    phone: string
+    orderNo: string
+    contact: string
+    contactDesensitized: string
 }
 export interface Separate {
   id: string
@@ -39,6 +46,9 @@ export interface IPrizeConfig {
   isShow: boolean
   isUsed: boolean
   frequency: number
+  isRandomByVoteCount: boolean
+  votedCount: number
+  personCount: number
 }
 export interface IMusic {
   id: string

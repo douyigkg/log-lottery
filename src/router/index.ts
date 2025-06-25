@@ -43,6 +43,11 @@ export const configRoutes = {
             icon: 'already',
           },
         },
+        {
+          path: '/log-lottery/config/person/summary',
+          name: 'SummaryPerson',
+          component: () => import('@/views/Config/Person/PersonSummary.vue'),
+        },
         // {
         //     path:'other',
         //     name:'OtherPersonConfig',
@@ -101,15 +106,15 @@ export const configRoutes = {
         },
       ],
     },
-    {
-      path: '/log-lottery/config/readme',
-      name: 'Readme',
-      component: () => import('@/views/Config/Readme/index.vue'),
-      meta: {
-        title: i18n.global.t('sidebar.operatingInstructions'),
-        icon: 'readme',
-      },
-    },
+    // {
+    //   path: '/log-lottery/config/readme',
+    //   name: 'Readme',
+    //   component: () => import('@/views/Config/Readme/index.vue'),
+    //   meta: {
+    //     title: i18n.global.t('sidebar.operatingInstructions'),
+    //     icon: 'readme',
+    //   },
+    // },
   ],
 }
 const routes = [
@@ -127,6 +132,11 @@ const routes = [
         path: '/log-lottery/demo',
         name: 'Demo',
         component: () => import('@/views/Demo/index.vue'),
+      },
+      {
+        path: '/log-lottery/data/import/auto',
+        name: 'Data AutoImport',
+        component: () => import('@/views/Config/Person/PersonAutoImport.vue'),
       },
       configRoutes,
     ],

@@ -1,7 +1,7 @@
 export default {
   button: {
     enterLottery: '进入抽奖',
-    start: '开始',
+    start: '开始抽',
     selectLucky: '抽取幸运儿',
     continue: '继续',
     confirm: '确认',
@@ -60,6 +60,7 @@ export default {
     noneData: '暂无数据',
     // prize configuration
     fullParticipation: '全员参加',
+    randomByVoteCount: '按票数',
     numberParticipants: '抽奖人数',
     isDone: '已抽取',
     image: '图片',
@@ -90,6 +91,7 @@ export default {
     dialogDelAllPerson: '该操作会删除所有人员数据，是否继续？',
     dialogResetWinner: '该操作会清空人员中奖信息，是否继续？',
     dialogResetAllData: '该操作会重置所有数据，是否继续？',
+    dialogImportData: '请选择对应的奖品组：',
     dialogSingleDrawLimit: '单次抽取只能抽取10位',
     dialogLatestBrowser: '请使用最新版Chrome或者Edge浏览器',
     tipResetPrize: '进行操作可能会重置数据，请谨慎操作',
@@ -142,9 +144,15 @@ export default {
     operation: '操作',
     delete: '删除',
     removePerson: '移入未中奖名单',
-    defaultTitle: '大明内阁六部御前奏对',
-    xlsxName: '人口登记表-zhCn.xlsx',
+    defaultTitle: '抖艺&玉窑活动抽奖',
+    xlsxName: '人员登记表-示例-zhCn.xlsx',
     readmeName: 'readme-zhCn.md',
+    phone: '手机号',
+    orderNo: '订单号',
+    contact: '联系方式',
+    nickname: '昵称',
+    voteCount: '票数',
+    prizeGroup: '奖品组',
   },
   footer: {
     'self-reflection': '行有不得，反求诸己',

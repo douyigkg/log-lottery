@@ -7,7 +7,8 @@ export const useGlobalConfig = defineStore('global', {
   state() {
     return {
       globalConfig: {
-        rowCount: 17,
+        // rowCount: 17,
+        rowCount: 30,
         isSHowPrizeList: true,
         isShowAvatar: false,
         topTitle: i18n.global.t('data.defaultTitle'),
@@ -16,14 +17,18 @@ export const useGlobalConfig = defineStore('global', {
           name: 'dracula',
           detail: { primary: '#0f5fd3' },
           cardColor: '#ff79c6',
-          cardWidth: 140,
-          cardHeight: 200,
-          textColor: '#ffffff',
-          luckyCardColor: '#ECB1AC',
-          textSize: 30,
+          cardWidth: 200,
+          cardHeight: 260,
+          textColor: '#f6e9ce',
+          luckyCardColor: '#7a0807',
+          textSize: 40,
           patternColor: '#1b66c9',
           patternList: defaultPatternList as number[],
-          background: {}, // 背景颜色或图片
+          background: {
+            id: '11',
+            name: '背景图',
+            url: 'https://cos.douyigkg.com/lottery/202503-bg.jpg',
+          }, // 背景颜色或图片
         },
         musicList: defaultMusicList as IMusic[],
         imageList: defaultImageList as IImage[],
@@ -239,7 +244,7 @@ export const useGlobalConfig = defineStore('global', {
     // 重置所有配置
     reset() {
       this.globalConfig = {
-        rowCount: 17,
+        rowCount: 30,
         isSHowPrizeList: true,
         isShowAvatar: false,
         topTitle: i18n.global.t('data.defaultTitle'),
@@ -248,14 +253,18 @@ export const useGlobalConfig = defineStore('global', {
           name: 'dracula',
           detail: { primary: '#0f5fd3' },
           cardColor: '#ff79c6',
-          cardWidth: 140,
-          cardHeight: 200,
-          textColor: '#ffffff',
-          luckyCardColor: '#ECB1AC',
-          textSize: 30,
+          cardWidth: 200,
+          cardHeight: 260,
+          textColor: '#f6e9ce',
+          luckyCardColor: '#7a0807',
+          textSize: 40,
           patternColor: '#1b66c9',
           patternList: defaultPatternList as number[],
-          background: {}, // 背景颜色或图片
+          background: {
+            id: '11',
+            name: '背景图',
+            url: 'https://cos.douyigkg.com/lottery/202503-bg.jpg',
+          }, // 背景颜色或图片
         },
         musicList: defaultMusicList as IMusic[],
         imageList: defaultImageList as IImage[],

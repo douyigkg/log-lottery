@@ -25,7 +25,7 @@ export function rgbToRgba(rgb: string) {
 
 // 组成rgb颜色添加透明度
 export function rgba(color: string, opacity: number) {
-  opacity = opacity || 1
+  opacity = opacity === 0 ? opacity : (opacity || 1)
   let rgbaStr = ''
   // 判断是否是hex颜色
   if (isHex(color)) {
