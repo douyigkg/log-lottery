@@ -21,7 +21,17 @@ export const usePersonConfig = defineStore('person', {
     },
     // 获取全部人员名单
     getAllPersonList(state) {
-      return state.personConfig.allPersonList.filter((item: IPersonConfig) => {
+      return state.personConfig.allPersonList.sort((a: IPersonConfig, b: IPersonConfig) => {
+        if (a.prizeGroupId > b.prizeGroupId) {
+          return 1
+        }
+        else if (a.prizeGroupId < b.prizeGroupId) {
+          return -1
+        }
+        else {
+          return b.voteCount - a.voteCount
+        }
+      }).filter((item: IPersonConfig) => {
         return item
       })
     },
@@ -48,6 +58,22 @@ export const usePersonConfig = defineStore('person', {
     getNotPersonList(state) {
       return state.personConfig.allPersonList.filter((item: IPersonConfig) => {
         return item.isWin === false
+      })
+    },
+    // 获取当前奖品组-全部人员名单
+    getCurrentPrizeGroupAllPersonList(state) {
+      const currentPrize = usePrizeConfig().prizeConfig.currentPrize
+      return state.personConfig.allPersonList.filter((item: IPersonConfig) => {
+        return item.prizeGroupId === currentPrize.id
+      })
+    },
+    // 取当前奖品组-未中奖人员名单
+    getCurrentPrizeGroupNotPersonList(state) {
+      const currentPrize = usePrizeConfig().prizeConfig.currentPrize
+      return state.personConfig.allPersonList.filter((item: IPersonConfig) => {
+        return item.prizeGroupId === currentPrize.id
+          && item.isWin === false
+          && state.personConfig.alreadyPersonList.findIndex((person: IPersonConfig) => person.uid === item.uid) < 0
       })
     },
   },

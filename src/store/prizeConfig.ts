@@ -28,6 +28,9 @@ export const usePrizeConfig = defineStore('prize', {
           isShow: false,
           isUsed: false,
           frequency: 1,
+          isRandomByVoteCount: true,
+          votedCount: 0,
+          personCount: 0,
         } as IPrizeConfig,
       },
     }
@@ -133,6 +136,9 @@ export const usePrizeConfig = defineStore('prize', {
         isShow: false,
         isUsed: false,
         frequency: 1,
+        isRandomByVoteCount: true,
+        votedCount: 0,
+        personCount: 0,
       } as IPrizeConfig
     },
     // 重置所有配置
@@ -160,6 +166,9 @@ export const usePrizeConfig = defineStore('prize', {
           isShow: false,
           isUsed: false,
           frequency: 1,
+          isRandomByVoteCount: true,
+          votedCount: 0,
+          personCount: 0,
         } as IPrizeConfig,
       }
     },

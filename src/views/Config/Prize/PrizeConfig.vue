@@ -43,6 +43,9 @@ function addPrize() {
     isUsed: false,
     isShow: true,
     frequency: 1,
+    isRandomByVoteCount: true,
+    votedCount: 0,
+    personCount: 0,
   }
   prizeConfig.addPrizeConfig(defaultPrizeCOnfig)
 }
@@ -198,13 +201,22 @@ watch(() => prizeList.value, (val: IPrizeConfig[]) => {
             class="w-full max-w-xs input-sm input input-bordered"
           >
         </label>
-        <label class="w-1/2 max-w-xs mb-10 form-control">
+        <!-- <label class="w-1/2 max-w-xs mb-10 form-control">
           <div class="label">
             <span class="label-text">{{ t('table.fullParticipation') }}</span>
           </div>
           <input
             type="checkbox" :checked="item.isAll" class="mt-2 border-solid checkbox checkbox-secondary border-1"
             @change="item.isAll = !item.isAll"
+          >
+        </label> -->
+        <label class="w-1/2 max-w-xs mb-10 form-control">
+          <div class="label">
+            <span class="label-text">{{ t('table.randomByVoteCount') }}</span>
+          </div>
+          <input
+            type="checkbox" :checked="item.isRandomByVoteCount" class="mt-2 border-solid checkbox checkbox-secondary border-1"
+            @change="item.isRandomByVoteCount = !item.isRandomByVoteCount"
           >
         </label>
         <label class="w-1/2 max-w-xs mb-10 form-control">

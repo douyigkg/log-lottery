@@ -7,6 +7,7 @@ import useStore from '@/store'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import * as XLSX from "xlsx"
 
 const { t } = useI18n()
 const personConfig = useStore().personConfig
@@ -25,6 +26,47 @@ function handleMoveNotPerson(row: IPersonConfig) {
   personConfig.moveAlreadyToNot(row)
 }
 
+function exportData() {
+  let data = JSON.parse(JSON.stringify(alreadyPersonDetail.value))
+  // 排除一些字段
+  for (let i = 0; i < data.length; i++) {
+    delete data[i].x
+    delete data[i].y
+    delete data[i].id
+    delete data[i].createTime
+    delete data[i].updateTime
+    delete data[i].prizeId
+    delete data[i].prizeGroupId
+    delete data[i].prizeGroupName
+    delete data[i].avatar
+    delete data[i].isWin
+
+    // 格式化数组为
+    data[i].prizeTime = data[i].prizeTime.join(',')
+    data[i].prizeName = data[i].prizeName.join(',')
+  }
+  let dataString = JSON.stringify(data)
+  dataString = dataString
+    .replaceAll(/uid/g, i18n.global.t('data.number'))
+    .replaceAll(/contact/g, i18n.global.t('data.contact'))
+    .replaceAll(/isWin/g, i18n.global.t('data.isWin'))
+    .replaceAll(/department/g, i18n.global.t('data.department'))
+    .replaceAll(/name/g, i18n.global.t('data.name'))
+    .replaceAll(/identity/g, i18n.global.t('data.identity'))
+    .replaceAll(/prizeName/g, i18n.global.t('data.prizeName'))
+    .replaceAll(/prizeTime/g, i18n.global.t('data.prizeTime'))
+    .replaceAll(/voteCount/g, i18n.global.t('data.voteCount'))
+
+  data = JSON.parse(dataString)
+
+  if (data.length > 0) {
+    const dataBinary = XLSX.utils.json_to_sheet(data)
+    const dataBinaryBinary = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(dataBinaryBinary, dataBinary, 'Sheet1')
+    XLSX.writeFile(dataBinaryBinary, '获奖人员名单.xlsx')
+  }
+}
+
 const tableColumnsList = [
   {
     label: i18n.global.t('data.number'),
@@ -36,19 +78,28 @@ const tableColumnsList = [
     props: 'name',
   },
   {
-    label: i18n.global.t('data.avatar'),
-    props: 'avatar',
-    formatValue(row: any) {
-       return row.avatar ? `<img src="${row.avatar}" alt="avatar" style="width: 50px; height: 50px;"/>` : '-';
-    }
+    label: i18n.global.t('data.contact'),
+    props: 'contact',
+    sort: true,
   },
+  // {
+  //   label: i18n.global.t('data.avatar'),
+  //   props: 'avatar',
+  //   formatValue(row: any) {
+  //     return row.avatar ? `<img src="${row.avatar}" alt="avatar" style="width: 50px; height: 50px;"/>` : '-'
+  //   },
+  // },
+  // {
+  //   label: i18n.global.t('data.department'),
+  //   props: 'department',
+  // },
+  // {
+  //   label: i18n.global.t('data.identity'),
+  //   props: 'identity',
+  // },
   {
-    label: i18n.global.t('data.department'),
-    props: 'department',
-  },
-  {
-    label: i18n.global.t('data.identity'),
-    props: 'identity',
+    label: i18n.global.t('data.voteCount'),
+    props: 'voteCount',
   },
   {
     label: i18n.global.t('data.prizeName'),
@@ -75,24 +126,29 @@ const tableColumnsDetail = [
     sort: true,
   },
   {
-    label: i18n.global.t('data.number'),
+    label: i18n.global.t('data.name'),
     props: 'name',
   },
   {
-    label: i18n.global.t('data.avatar'),
-    props: 'avatar',
-    formatValue(row: any) {
-       return row.avatar ? `<img src="${row.avatar}" alt="avatar" style="width: 50px; height: 50px;"/>` : '-';
-    }
+    label: i18n.global.t('data.contact'),
+    props: 'contact',
+    sort: true,
   },
-  {
-    label: i18n.global.t('data.department'),
-    props: 'department',
-  },
-  {
-    label: i18n.global.t('data.identity'),
-    props: 'identity',
-  },
+  // {
+  //   label: i18n.global.t('data.avatar'),
+  //   props: 'avatar',
+  //   formatValue(row: any) {
+  //     return row.avatar ? `<img src="${row.avatar}" alt="avatar" style="width: 50px; height: 50px;"/>` : '-'
+  //   },
+  // },
+  // {
+  //   label: i18n.global.t('data.department'),
+  //   props: 'department',
+  // },
+  // {
+  //   label: i18n.global.t('data.identity'),
+  //   props: 'identity',
+  // },
   {
     label: i18n.global.t('data.prizeName'),
     props: 'prizeName',
@@ -123,6 +179,9 @@ const tableColumnsDetail = [
   <div class="overflow-y-auto">
     <h2>{{ t('viewTitle.winnerManagement') }}</h2>
     <div class="flex items-center justify-start gap-10">
+      <button class="btn btn-accent btn-sm" @click="exportData">
+        {{ t('button.exportResult') }}
+      </button>
       <div>
         <span>{{ t('table.luckyPeopleNumber') }}：</span>
         <span>{{ alreadyPersonList.length }}</span>

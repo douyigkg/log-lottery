@@ -68,7 +68,7 @@ function skip(path: string) {
     <router-view class="flex-1 mt-5" />
   </div>
   <footer class="p-10 rounded footer footer-center bg-base-200 text-base-content">
-    <nav class="grid grid-flow-col gap-4">
+    <!-- <nav class="grid grid-flow-col gap-4">
       <a class="cursor-pointer link link-hover text-inherit" target="_blank" href="https://1kw20.fun">{{ t('footer.self-reflection') }}</a>
     </nav>
     <nav>
@@ -90,7 +90,7 @@ function skip(path: string) {
         蜀ICP备2021028666号
       </p>
       <p>Copyright © 2024 - All right reserved by Log1997</p>
-    </aside>
+    </aside> -->
   </footer>
 </template>
 

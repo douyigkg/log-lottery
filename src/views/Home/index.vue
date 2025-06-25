@@ -5,7 +5,7 @@ import StarsBackground from '@/components/StarsBackground/index.vue'
 import { useElementPosition, useElementStyle } from '@/hooks/useElement'
 import i18n from '@/locales/i18n'
 import useStore from '@/store'
-import { filterData, selectCard } from '@/utils'
+import { filterData, selectCard, secureRandom } from '@/utils'
 import { rgba } from '@/utils/color'
 import * as TWEEN from '@tweenjs/tween.js'
 import confetti from 'canvas-confetti'
@@ -26,10 +26,10 @@ const router = useRouter()
 const personConfig = useStore().personConfig
 const globalConfig = useStore().globalConfig
 const prizeConfig = useStore().prizeConfig
+const log = useStore().log
 
-const { getAllPersonList: allPersonList, getNotPersonList: notPersonList, getNotThisPrizePersonList: notThisPrizePersonList,
-} = storeToRefs(personConfig)
-const { getCurrentPrize: currentPrize } = storeToRefs(prizeConfig)
+const { getCurrentPrizeGroupNotPersonList: notPersonList } = storeToRefs(personConfig)
+const { getCurrentPrize: currentPrize, getPrizeConfig: prizeList } = storeToRefs(prizeConfig)
 const { getTopTitle: topTitle, getCardColor: cardColor, getPatterColor: patternColor, getPatternList: patternList, getTextColor: textColor, getLuckyColor: luckyColor, getCardSize: cardSize, getTextSize: textSize, getRowCount: rowCount, getBackground: homeBackground, getIsShowAvatar: isShowAvatar } = storeToRefs(globalConfig)
 const tableData = ref<any[]>([])
 const currentStatus = ref(0) // 0为初始状态， 1为抽奖准备状态，2为抽奖中状态，3为抽奖结束状态
@@ -37,6 +37,7 @@ const ballRotationY = ref(0)
 const containerRef = ref<HTMLElement>()
 const canOperate = ref(true)
 const cameraZ = ref(3000)
+const titleContainerRef = ref<HTMLElement>()
 
 const scene = ref()
 const camera = ref()
@@ -64,12 +65,14 @@ const personPool = ref<IPersonConfig[]>([])
 const intervalTimer = ref<any>(null)
 // 填充数据，填满七行
 function initTableData() {
-  if (allPersonList.value.length <= 0) {
+  if (notPersonList.value.length <= 0) {
     return
   }
+  log.addLog({ type: 'initTableData', content: `total count:${notPersonList.value.length}` })
   const totalCount = rowCount.value * 7
-  const originPersonData = JSON.parse(JSON.stringify(allPersonList.value))
+  const originPersonData = JSON.parse(JSON.stringify(notPersonList.value))
   const originPersonLength = originPersonData.length
+  tableData.value = []
   if (originPersonLength < totalCount) {
     const repeatCount = Math.ceil(totalCount / originPersonLength)
     // 复制数据
@@ -116,11 +119,17 @@ function init() {
     let element = document.createElement('div')
     element.className = 'element-card'
 
-    const number = document.createElement('div')
-    number.className = 'card-id'
-    number.textContent = tableData.value[i].uid
-    if(isShowAvatar.value) number.style.display = 'none'
-    element.appendChild(number)
+    // const number = document.createElement('div')
+    // number.className = 'card-id'
+    // number.textContent = tableData.value[i].uid
+    // if(isShowAvatar.value) number.style.display = 'none'
+    // element.appendChild(number)
+
+    const contactEl = document.createElement('div')
+    contactEl.className = 'card-id'
+    contactEl.textContent = tableData.value[i].contact
+    if(isShowAvatar.value) contactEl.style.display = 'none'
+    element.appendChild(contactEl)
 
     const symbol = document.createElement('div')
     symbol.className = 'card-name'
@@ -128,22 +137,28 @@ function init() {
     if(isShowAvatar.value) symbol.className = 'card-name card-avatar-name'
     element.appendChild(symbol)
 
+    // const detail = document.createElement('div')
+    // detail.className = 'card-detail'
+    // detail.innerHTML = `${tableData.value[i].department}<br/>${tableData.value[i].identity}`
+    // if(isShowAvatar.value) detail.style.display = 'none'
+    // element.appendChild(detail)
+
     const detail = document.createElement('div')
     detail.className = 'card-detail'
-    detail.innerHTML = `${tableData.value[i].department}<br/>${tableData.value[i].identity}`
+    detail.innerHTML = `${tableData.value[i].prizeGroupName}<br/>用户票数：${tableData.value[i].voteCount}<br/><hr style="border: 1px solid #dca54c; margin: 12px 0;">${currentPrize.value.name}总票数<br/>${currentPrize.value.votedCount}`
     if(isShowAvatar.value) detail.style.display = 'none'
     element.appendChild(detail)
 
-    const avatar = document.createElement('img');
-    avatar.className = 'card-avatar';
-    avatar.src = tableData.value[i].avatar;
-    avatar.alt = 'avatar';
-    avatar.style.width = '140px';
-    avatar.style.height = '140px';
-    if(!isShowAvatar.value) avatar.style.display = 'none'
-    element.appendChild(avatar);
+    // const avatar = document.createElement('img');
+    // avatar.className = 'card-avatar';
+    // avatar.src = tableData.value[i].avatar;
+    // avatar.alt = 'avatar';
+    // avatar.style.width = '140px';
+    // avatar.style.height = '140px';
+    // if(!isShowAvatar.value) avatar.style.display = 'none'
+    // element.appendChild(avatar);
 
-    element = useElementStyle(element, tableData.value[i], i, patternList.value, patternColor.value, cardColor.value, cardSize.value, textSize.value)
+    element = useElementStyle(element, tableData.value[i], currentPrize.value, i, patternList.value, patternColor.value, cardColor.value, cardSize.value, textSize.value)
     const object = new CSS3DObject(element)
     object.position.x = Math.random() * 4000 - 2000
     object.position.y = Math.random() * 4000 - 2000
@@ -217,11 +232,44 @@ function init() {
     }
   }
   window.addEventListener('resize', onWindowResize, false)
-  transform(targets.table, 1000)
-  render()
+  // transform(targets.table, 1000)
+  // render()
 }
 
-function transform(targets: any[], duration: number) {
+function refreshData(toSetOpacityCardList: number[]) {
+  // 验证是否已抽完全部奖项
+  if (currentPrize.value.id === prizeList.value[prizeList.value.length - 1].id && currentPrize.value.isUsed) {
+    currentStatus.value = 4
+
+    toast.open({
+      message: i18n.global.t('error.personIsAllDone'),
+      type: 'warning',
+      position: 'top-right',
+      duration: 10000,
+    })
+
+    return
+  }
+
+  return new Promise((resolve) => {
+    // 获取新的tableData
+    initTableData()
+
+    // 替换现有数据
+    for (let i = 0; i < objects.value.length; i++) {
+      objects.value[i].element = useElementStyle(objects.value[i].element, tableData.value[i], currentPrize.value, i, patternList.value, patternColor.value, cardColor.value, cardSize.value, textSize.value, 'sphere', 'change')
+      if (toSetOpacityCardList.includes(i)) {
+        objects.value[i].element.style.opacity = 1
+      }
+    }
+
+    currentStatus.value = 1
+    canOperate.value = true
+    resolve('')
+  })
+}
+
+function transform(targets: any[], duration: number, fromPreHandler: boolean = false) {
   TWEEN.removeAll()
   if (intervalTimer.value) {
     clearInterval(intervalTimer.value)
@@ -247,13 +295,13 @@ function transform(targets: any[], duration: number) {
           if (luckyCardList.value.length) {
             luckyCardList.value.forEach((cardIndex: any) => {
               const item = objects.value[cardIndex]
-              useElementStyle(item.element, {} as any, i, patternList.value, patternColor.value, cardColor.value, cardSize.value, textSize.value, 'sphere')
+              useElementStyle(item.element, {} as any, currentPrize.value, i, patternList.value, patternColor.value, cardColor.value, cardSize.value, textSize.value, 'sphere', 'recovery')
             })
           }
           luckyTargets.value = []
           luckyCardList.value = []
 
-          canOperate.value = true
+          // canOperate.value = true
         })
     }
 
@@ -263,7 +311,10 @@ function transform(targets: any[], duration: number) {
       .onUpdate(render)
       .start()
       .onComplete(() => {
-        canOperate.value = true
+        if (!fromPreHandler) {
+          currentStatus.value = 1
+          canOperate.value = true
+        }
         resolve('')
       })
   })
@@ -344,7 +395,7 @@ function resetCamera() {
         .onUpdate(render)
         .start()
         .onComplete(() => {
-          canOperate.value = true
+          // canOperate.value = true
           // camera.value.lookAt(scene.value.position)
           camera.value.position.y = 0
           camera.value.position.x = 0
@@ -362,10 +413,18 @@ function render() {
     renderer.value.render(scene.value, camera.value)
   }
 }
-async function enterLottery() {
-  if (!canOperate.value) {
+function clickEnterLottery() {
+  enterLottery()
+}
+async function enterLottery(fromPreHandler: boolean = false) {
+  if (!canOperate.value && !fromPreHandler) {
     return
   }
+  if (!scene.value) {
+    animateTitleToTop()
+    initLottery()
+  }
+
   if (!intervalTimer.value) {
     randomBallData()
   }
@@ -376,9 +435,11 @@ async function enterLottery() {
       }
     }
   }
-  canOperate.value = false
-  await transform(targets.sphere, 1000)
-  currentStatus.value = 1
+  if (!fromPreHandler) {
+    canOperate.value = false
+  }
+  await transform(targets.sphere, 1000, fromPreHandler)
+  // currentStatus.value = 1
   rollBall(0.1, 2000)
 }
 // 开始抽奖
@@ -397,7 +458,9 @@ function startLottery() {
 
     return
   }
-  personPool.value = currentPrize.value.isAll ? notThisPrizePersonList.value : notPersonList.value
+  // personPool.value = currentPrize.value.isAll ? notThisPrizePersonList.value : notPersonList.value
+  personPool.value = notPersonList.value
+  log.addLog({ type: 'startLottery', content: `pool count:${personPool.value.length}` })
   // 验证抽奖人数是否还够
   if (personPool.value.length < currentPrize.value.count - currentPrize.value.isUsedCount) {
     toast.open({
@@ -425,7 +488,27 @@ function startLottery() {
   luckyCount.value = leftover < luckyCount.value ? leftover : luckyCount.value
   for (let i = 0; i < luckyCount.value; i++) {
     if (personPool.value.length > 0) {
-      const randomIndex = Math.round(Math.random() * (personPool.value.length - 1))
+      let randomIndex = -1
+      if (!currentPrize.value.isRandomByVoteCount) {
+        randomIndex = Math.floor(secureRandom() * personPool.value.length)
+        log.addLog({ type: 'lottery', content: `randomIdx:${randomIndex}/${personPool.value.length - 1}` })
+      }
+      else {
+        const sumCount = personPool.value.reduce((sum, item) => sum + item.voteCount, 0)
+        const random = secureRandom() * sumCount
+        let cumulative = 0
+        log.addLog({ type: 'lottery', content: `random:${random}/${sumCount}` })
+
+        for (let j = 0; j < personPool.value.length; j++) {
+          const item = personPool.value[j]
+          cumulative += item.voteCount
+          if (random < cumulative) {
+            randomIndex = j
+            break
+          }
+        }
+      }
+      log.addLog({ type: 'lottery', content: `抽中${randomIndex}-${personPool.value[randomIndex].uid}-${personPool.value[randomIndex].name}` })
       luckyTargets.value.push(personPool.value[randomIndex])
       personPool.value.splice(randomIndex, 1)
     }
@@ -439,7 +522,7 @@ function startLottery() {
     duration: 8000,
   })
   currentStatus.value = 2
-  rollBall(10, 3000)
+  rollBall(10, 3000 * 7)
 }
 
 async function stopLottery() {
@@ -451,12 +534,18 @@ async function stopLottery() {
   canOperate.value = false
   rollBall(0, 1)
 
+  if (checkLastPrizeEnd()) {
+    currentStatus.value = 4
+  }
+
   const windowSize = { width: window.innerWidth, height: window.innerHeight }
   luckyTargets.value.forEach((person: IPersonConfig, index: number) => {
-    const cardIndex = selectCard(luckyCardList.value, tableData.value.length, person.id)
+    log.addLog({ type: 'stopLottery', content: `展示抽中:${person.uid}-${person.name}` })
+    const cardIndex = selectCard(luckyCardList.value, tableData.value, person.id)
     luckyCardList.value.push(cardIndex)
     const totalLuckyCount = luckyTargets.value.length
     const item = objects.value[cardIndex]
+    log.addLog({ type: 'stopLottery', content: `匹配卡片:${item.element.innerText}` })
     const { xTable, yTable } = useElementPosition(item, rowCount.value, totalLuckyCount, { width: cardSize.value.width * 2, height: cardSize.value.height * 2 }, windowSize, index)
     new TWEEN.Tween(item.position)
       .to({
@@ -466,12 +555,15 @@ async function stopLottery() {
       }, 1200)
       .easing(TWEEN.Easing.Exponential.InOut)
       .onStart(() => {
-        item.element = useElementStyle(item.element, person, cardIndex, patternList.value, patternColor.value, luckyColor.value, { width: cardSize.value.width * 2, height: cardSize.value.height * 2 }, textSize.value * 2, 'lucky')
+        item.element = useElementStyle(item.element, person, currentPrize.value, cardIndex, patternList.value, patternColor.value, luckyColor.value, { width: cardSize.value.width * 2, height: cardSize.value.height * 2 }, textSize.value * 2, 'lucky', 'change')
+        tableData.value[cardIndex] = person
       })
       .start()
       .onComplete(() => {
+        if (currentStatus.value !== 4) {
+          currentStatus.value = 3
+        }
         canOperate.value = true
-        currentStatus.value = 3
       })
     new TWEEN.Tween(item.rotation)
       .to({
@@ -487,12 +579,20 @@ async function stopLottery() {
       })
   })
 }
-// 继续
-async function continueLottery() {
-  if (!canOperate.value) {
-    return
+function checkLastPrizeEnd(): boolean {
+  if (currentPrize.value.id === prizeList.value[prizeList.value.length - 1].id) {
+    const isUsedCount = currentPrize.value.isUsedCount + luckyCount.value
+    if (isUsedCount < currentPrize.value.count) {
+      return false
+    }
+    updatePrizePersonList()
+
+    return currentPrize.value.isUsed
   }
 
+  return false
+}
+function updatePrizePersonList() {
   const customCount = currentPrize.value.separateCount
   if (customCount && customCount.enable && customCount.countList.length > 0) {
     for (let i = 0; i < customCount.countList.length; i++) {
@@ -510,11 +610,41 @@ async function continueLottery() {
   }
   personConfig.addAlreadyPersonList(luckyTargets.value, currentPrize.value)
   prizeConfig.updatePrizeConfig(currentPrize.value)
-  await enterLottery()
+}
+// 继续
+async function continueLottery() {
+  if (!canOperate.value) {
+    return
+  }
+  canOperate.value = false
+
+  updatePrizePersonList()
+
+  const toSetOpacityCardList: number[] = []
+  const animationPromises = luckyCardList.value.map((cardIndex: number) => {
+    return new Promise<void>((resolve) => {
+      const item = objects.value[cardIndex]
+      new TWEEN.Tween(item.position)
+        .to({ x: window.innerWidth * 1.5, y: item.position.y, z: item.position.z }, 500)
+        .easing(TWEEN.Easing.Exponential.InOut)
+        .onUpdate(render)
+        .onComplete(() => {
+          item.element.style.opacity = 0
+          toSetOpacityCardList.push(cardIndex)
+          resolve()
+        })
+        .start()
+    })
+  })
+
+  await Promise.all(animationPromises)
+  await enterLottery(true)
+  // 更换奖品，重新准备数据
+  await refreshData(toSetOpacityCardList)
 }
 function quitLottery() {
   enterLottery()
-  currentStatus.value = 0
+  // currentStatus.value = 0
 }
 // 庆祝动画
 function confettiFire() {
@@ -588,7 +718,7 @@ function randomBallData(mod: 'default' | 'lucky' | 'sphere' = 'default') {
     const personRandomIndexArr: number[] = []
     for (let i = 0; i < indexLength; i++) {
       const randomCardIndex = Math.round(Math.random() * (tableData.value.length - 1))
-      const randomPersonIndex = Math.round(Math.random() * (allPersonList.value.length - 1))
+      const randomPersonIndex = Math.round(Math.random() * (notPersonList.value.length - 1))
       if (luckyCardList.value.includes(randomCardIndex)) {
         continue
       }
@@ -599,19 +729,20 @@ function randomBallData(mod: 'default' | 'lucky' | 'sphere' = 'default') {
       if (!objects.value[cardRandomIndexArr[i]]) {
         continue
       }
-      objects.value[cardRandomIndexArr[i]].element = useElementStyle(objects.value[cardRandomIndexArr[i]].element, allPersonList.value[personRandomIndexArr[i]], cardRandomIndexArr[i], patternList.value, patternColor.value, cardColor.value, { width: cardSize.value.width, height: cardSize.value.height }, textSize.value, mod, 'change')
+      objects.value[cardRandomIndexArr[i]].element = useElementStyle(objects.value[cardRandomIndexArr[i]].element, notPersonList.value[personRandomIndexArr[i]], currentPrize.value, cardRandomIndexArr[i], patternList.value, patternColor.value, cardColor.value, { width: cardSize.value.width, height: cardSize.value.height }, textSize.value, mod, 'change')
+      tableData.value[cardRandomIndexArr[i]] = notPersonList.value[personRandomIndexArr[i]]
     }
   }, 200)
 }
 // 监听键盘
 function listenKeyboard(e: any) {
-  if ((e.keyCode !== 32 || e.keyCode !== 27) && !canOperate.value) {
+  if ((e.keyCode !== 32 && e.keyCode !== 27) || !canOperate.value) {
     return
   }
   if (e.keyCode === 27 && currentStatus.value === 3) {
     quitLottery()
   }
-  if (e.keyCode !== 32) {
+  if (e.keyCode !== 32 || tableData.value.length === 0) {
     return
   }
   switch (currentStatus.value) {
@@ -678,12 +809,35 @@ function cleanup() {
   renderer.value = null
   controls.value = null
 }
-onMounted(() => {
-  initTableData()
+function initLottery() {
   init()
   animation()
-  containerRef.value!.style.color = `${textColor}`
+  // containerRef.value!.style.color = `${textColor}`
   randomBallData()
+}
+function animateTitleToTop() {
+  const element = titleContainerRef.value
+  if (!element) {
+    return
+  }
+
+  element.style.transition = 'top 0.6s ease-in-out'
+  element.style.top = '0'
+  element.style.transform = 'translate(-50%, 0)'
+}
+onMounted(() => {
+  // 验证是否已抽完全部奖项
+  if (currentPrize.value.isUsed || !currentPrize.value) {
+    currentStatus.value = 4
+    toast.open({
+      message: i18n.global.t('error.personIsAllDone'),
+      type: 'warning',
+      position: 'top-right',
+      duration: 10000,
+    })
+  }
+  initTableData()
+  // initLottery()
   window.addEventListener('keydown', listenKeyboard)
 })
 onUnmounted(() => {
@@ -697,7 +851,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 left-1/2">
+  <div ref="titleContainerRef"
+       class="absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 left-1/2 top-[40%] -translate-y-1/2">
     <h2
       class="pt-12 m-0 mb-12 font-mono tracking-wide text-center leading-12 header-title"
       :style="{ fontSize: `${textSize * 1.5}px`, color: textColor }"
@@ -706,6 +861,12 @@ onUnmounted(() => {
     </h2>
     <div class="flex gap-3">
       <button
+        v-if="tableData.length <= 0" class="cursor-pointer btn btn-outline btn-lg"
+        @click="router.push('data/import/auto')"
+      >
+        {{ t('button.noInfoAndImport') }}
+      </button>
+      <!-- <button
         v-if="tableData.length <= 0" class="cursor-pointer btn btn-outline btn-secondary btn-lg"
         @click="router.push('config')"
       >
@@ -716,19 +877,24 @@ onUnmounted(() => {
         @click="setDefaultPersonList"
       >
         {{ t('button.useDefault') }}
-      </button>
+      </button> -->
     </div>
   </div>
-  <div id="container" ref="containerRef" class="3dContainer">
+  <div id="container" ref="containerRef" class="3dContainer" :style="{ color: textColor }">
     <!-- 选中菜单结构 start -->
-    <div id="menu">
-      <button v-if="currentStatus === 0 && tableData.length > 0" class="btn-end " @click="enterLottery">
+    <!-- <div class="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-4">
+      <button v-if="currentStatus === 0 && tableData.length > 0" class="btn-end btn-lg w-80" @click="enterLottery">
+        {{ t('button.enterLottery') }}
+      </button>
+    </div> -->
+    <div v-if="currentStatus !== 4" v-show="canOperate" id="menu">
+      <button v-if="currentStatus === 0 && tableData.length > 0" class="btn-operate" @click="clickEnterLottery">
         {{ t('button.enterLottery') }}
       </button>
 
-      <div v-if="currentStatus === 1" class="start">
-        <button class="btn-start" @click="startLottery">
-          <strong>{{ t('button.start') }}</strong>
+      <!-- <div v-if="currentStatus === 1" class="start">
+        <button class="btn-start !w-64" @click="startLottery">
+          <strong>{{ t('button.start') }}{{currentPrize.name}}</strong>
           <div id="container-stars">
             <div id="stars" />
           </div>
@@ -738,15 +904,21 @@ onUnmounted(() => {
             <div class="circle" />
           </div>
         </button>
-      </div>
+      </div> -->
+      <button v-if="currentStatus === 1" class="btn-operate" @click="startLottery">
+        {{ t('button.start') }}{{currentPrize.name}}
+      </button>
 
-      <button v-if="currentStatus === 2" class="btn-end btn glass btn-lg" @click="stopLottery">
+      <button v-if="currentStatus === 2" class="btn-operate" @click="stopLottery">
         {{ t('button.selectLucky') }}
       </button>
 
-      <div v-if="currentStatus === 3" class="flex justify-center gap-6 enStop">
+      <button v-if="currentStatus === 3" class="btn-operate" @click="continueLottery">
+        {{ t('button.continue') }}
+      </button>
+      <!-- <div v-if="currentStatus === 3" class="flex justify-center gap-6 enStop">
         <div class="start">
-          <button class="btn-start" @click="continueLottery">
+          <button class="btn-start !w-64" @click="continueLottery">
             <strong>{{ t('button.continue') }}</strong>
             <div id="container-stars">
               <div id="stars" />
@@ -772,7 +944,7 @@ onUnmounted(() => {
             </div>
           </button>
         </div>
-      </div>
+      </div> -->
     </div>
     <!-- end -->
   </div>
@@ -785,7 +957,7 @@ onUnmounted(() => {
     position: absolute;
     z-index: 100;
     width: 100%;
-    bottom: 50px;
+    bottom: 40px;
     text-align: center;
     margin: 0 auto;
     font-size: 32px;
@@ -800,6 +972,19 @@ onUnmounted(() => {
     // 居中
     display: flex;
     justify-content: center;
+}
+
+.btn-operate {
+  //font-family: '思源宋体', serif;
+  cursor: pointer;
+  width: 30rem;
+  height: 5.5rem;
+  font-size: 2.5rem;
+  color: #8a3f00;
+  font-weight: 700;
+  border: none;
+  border-radius: 3rem;
+  background: linear-gradient(180deg, rgba(242, 153, 114, 1) 0%, rgba(247, 234, 209, 1) 55.76%, rgba(238, 211, 161, 1) 100%);
 }
 
 .btn-start {

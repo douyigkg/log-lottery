@@ -60,6 +60,7 @@ export default {
     noneData: 'No Data',
     // prize configuration
     fullParticipation: 'FullParticipation',
+    randomByVoteCount: 'RandomByVoteCount',
     numberParticipants: 'NumberParticipants',
     isDone: 'is Done',
     image: 'Image',
@@ -90,6 +91,7 @@ export default {
     dialogDelAllPerson: 'This operation will delete all personnel list data. Do you want to continue?',
     dialogResetWinner: 'This operation will clear the winning information of personnel. Do you want to continue?',
     dialogResetAllData: 'This operation will reset all data. Do you want to continue?',
+    dialogImportData: 'Please select the corresponding prize group:',
     dialogSingleDrawLimit: 'Only 10 characters can be extracted in a single draw',
     dialogLatestBrowser: 'Please use the latest version of Chrome or Edge browser',
     tipResetPrize: 'Performing operations may reset data, please proceed with caution',
@@ -145,6 +147,12 @@ export default {
     defaultTitle: 'The Prelude to the Six Ministries of the Ming Dynasty Cabinet',
     xlsxName: 'personListTemplate-en.xlsx',
     readmeName: 'readme-en.md',
+    phone: 'Phone',
+    orderNo: 'Order No',
+    contact: 'Contact',
+    nickname: 'Nickname',
+    voteCount: 'Vote Count',
+    prizeGroup: 'Prize Group',
   },
   footer: {
     'self-reflection': 'Turn inward and examine yourself when you encounter difficulties in life.',

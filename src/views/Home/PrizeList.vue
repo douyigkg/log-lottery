@@ -241,20 +241,16 @@ onMounted(() => {
       </div>
       <transition name="prize-list" :appear="true">
         <div v-if="prizeShow && !isMobile && !temporaryPrize.isShow" class="flex items-center">
-          <ul ref="prizeListRef" class="flex flex-col gap-1 p-2 rounded-xl bg-slate-500/50">
+          <ul ref="prizeListRef" class="flex flex-col gap-2 p-2 rounded-md bg-black/20">
             <li
               v-for="item in localPrizeList" :key="item.id"
               :class="currentPrize.id === item.id ? 'current-prize' : ''"
             >
               <div
                 v-if="item.isShow"
-                class="relative flex flex-row items-center justify-between w-64 h-20 shadow-xl card bg-base-100"
+                class="relative flex flex-row items-center justify-between w-64 h-24 px-2 shadow-xl card rounded-md"
               >
-                <div
-                  v-if="item.isUsed"
-                  class="absolute z-50 w-full h-full bg-gray-800/70 item-mask rounded-xl"
-                />
-                <figure class="w-10 h-10 rounded-xl">
+                <figure class="w-20 h-20 rounded-xl m-0">
                   <ImageSync v-if="item.picture.url" :img-item="item.picture" />
                   <img
                     v-else :src="defaultPrizeImage" alt="Prize"
@@ -269,36 +265,40 @@ onMounted(() => {
                       {{ item.name }}
                     </h2>
                   </div>
-                  <p class="absolute z-40 p-0 m-0 text-gray-300/80 mt-9">
+                  <p class="absolute z-40 p-0 m-0 text-white mt-9">
                     {{ item.isUsedCount }}/{{
                       item.count }}
                   </p>
                   <progress
-                    class="w-3/4 h-6 progress progress-primary" :value="item.isUsedCount"
+                    class="w-3/4 h-6 progress" :value="item.isUsedCount"
                     :max="item.count"
                   />
                   <!-- <p class="p-0 m-0">{{ item.isUsedCount }}/{{ item.count }}</p> -->
                 </div>
+                <div
+                  v-if="item.isUsed"
+                  class="absolute left-0 z-50 w-full h-full bg-black/40 item-mask rounded-md"
+                />
               </div>
             </li>
           </ul>
           <div class="flex flex-col gap-3">
             <div class="tooltip tooltip-right" :data-tip="t('tooltip.prizeList')">
               <div
-                class="flex items-center w-6 h-8 rounded-r-lg cursor-pointer prize-option bg-slate-500/50"
+                class="flex items-center w-6 h-8 rounded-r-lg cursor-pointer prize-option bg-black/20"
                 @click="prizeShow = !prizeShow"
               >
                 <svg-icon name="arrow_left" class="w-full h-full" />
               </div>
             </div>
-            <div class="tooltip tooltip-right" :data-tip="t('tooltip.addActivity')">
+            <!-- <div class="tooltip tooltip-right" :data-tip="t('tooltip.addActivity')">
               <div
                 class="flex items-center w-6 h-8 rounded-r-lg cursor-pointer prize-option bg-slate-500/50"
                 @click="addTemporaryPrize"
               >
                 <svg-icon name="add" class="w-full h-full" />
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </transition>
@@ -307,7 +307,7 @@ onMounted(() => {
     <transition name="prize-operate" :appear="true">
       <div v-show="!prizeShow" class="tooltip tooltip-right" :data-tip="t('tooltip.prizeList')">
         <div
-          class="flex items-center w-6 h-8 rounded-r-lg cursor-pointer prize-option bg-slate-500/50"
+          class="flex items-center w-6 h-8 rounded-r-lg cursor-pointer prize-option bg-black/20"
           @click="prizeShow = !prizeShow"
         >
           <svg-icon name="arrow_right" class="w-full h-full" />
@@ -318,6 +318,17 @@ onMounted(() => {
 </template>
 
 <style lang='scss' scoped>
+.card {
+  box-sizing: border-box;
+  background: rgba(247, 198, 162, 0.35);
+}
+.progress {
+  background: rgba(134, 13, 12, 1);
+}
+.progress::-webkit-progress-value {
+  background: rgba(134, 13, 12, 1);
+}
+
 .label {
     width: 120px;
 }
@@ -344,36 +355,39 @@ onMounted(() => {
     overflow: hidden;
     isolation: isolate;
 
-    border-radius: 20px;
-    padding: 3px;
+    //border-radius: 20px;
+    //padding: 3px;
+    .card {
+      border: 2px solid rgba(245, 229, 199, 1);
+    }
 }
 
-.current-prize::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 400%;
-    height: 100%;
-    background: linear-gradient(115deg, #4fcf70, #fad648, #a767e5, #12bcfe, #44ce7b);
-    background-size: 25% 100%;
-    animation: an-at-keyframe-css-at-rule-that-translates-via-the-transform-property-the-background-by-negative-25-percent-of-its-width-so-that-it-gives-a-nice-border-animation_-We-use-the-translate-property-to-have-a-nice-transition-so-it_s-not-a-jerk-of-a-start-or-stop .75s linear infinite;
-    // animation-play-state: paused;
-    translate: -5% 0%;
-    transition: translate 0.25s ease-out;
-    animation-play-state: running;
-    transition-duration: 0.75s;
-    translate: 0% 0%;
-}
-
-.current-prize::after {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    border-top-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    z-index: -1;
-}
+//.current-prize::before {
+//    content: "";
+//    position: absolute;
+//    top: 0;
+//    left: 0;
+//    width: 400%;
+//    height: 100%;
+//    background: linear-gradient(115deg, #4fcf70, #fad648, #a767e5, #12bcfe, #44ce7b);
+//    background-size: 25% 100%;
+//    animation: an-at-keyframe-css-at-rule-that-translates-via-the-transform-property-the-background-by-negative-25-percent-of-its-width-so-that-it-gives-a-nice-border-animation_-We-use-the-translate-property-to-have-a-nice-transition-so-it_s-not-a-jerk-of-a-start-or-stop .75s linear infinite;
+//    // animation-play-state: paused;
+//    translate: -5% 0%;
+//    transition: translate 0.25s ease-out;
+//    animation-play-state: running;
+//    transition-duration: 0.75s;
+//    translate: 0% 0%;
+//}
+//
+//.current-prize::after {
+//    content: "";
+//    position: absolute;
+//    inset: 4px;
+//    border-top-left-radius: 20px;
+//    border-bottom-right-radius: 20px;
+//    z-index: -1;
+//}
 
 @keyframes an-at-keyframe-css-at-rule-that-translates-via-the-transform-property-the-background-by-negative-25-percent-of-its-width-so-that-it-gives-a-nice-border-animation_-We-use-the-translate-property-to-have-a-nice-transition-so-it_s-not-a-jerk-of-a-start-or-stop {
     to {
