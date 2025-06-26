@@ -65,21 +65,21 @@ export const defaultMusicList = [
 export const defaultPrizeList = <IPrizeConfig[]>[
   {
     id: '001',
-    name: '三等奖',
+    name: '人气TOP3作品',
     sort: 1,
     isAll: false,
     count: 1,
     isUsedCount: 0,
     picture: {
       id: '2',
-      name: '三等奖',
+      name: '人气TOP3作品',
       url: 'https://cos.douyigkg.com/lottery/202503-TOP3.jpg',
     },
     separateCount: {
       enable: true,
       countList: [],
     },
-    desc: '三等奖',
+    desc: '人气TOP3作品',
     isShow: true,
     isUsed: false,
     frequency: 1,
@@ -89,21 +89,21 @@ export const defaultPrizeList = <IPrizeConfig[]>[
   },
   {
     id: '002',
-    name: '二等奖',
+    name: '人气TOP2作品',
     sort: 2,
     isAll: false,
     count: 1,
     isUsedCount: 0,
     picture: {
       id: '1',
-      name: '二等奖',
+      name: '人气TOP2作品',
       url: 'https://cos.douyigkg.com/lottery/202503-TOP2.jpg',
     },
     separateCount: {
       enable: false,
       countList: [],
     },
-    desc: '二等奖',
+    desc: '人气TOP2作品',
     isShow: true,
     isUsed: false,
     frequency: 1,
@@ -113,21 +113,21 @@ export const defaultPrizeList = <IPrizeConfig[]>[
   },
   {
     id: '003',
-    name: '一等奖',
+    name: '人气TOP1作品',
     sort: 3,
     isAll: false,
     count: 1,
     isUsedCount: 0,
     picture: {
       id: '0',
-      name: '一等奖',
+      name: '人气TOP1作品',
       url: 'https://cos.douyigkg.com/lottery/202503-TOP1.jpg',
     },
     separateCount: {
       enable: false,
       countList: [],
     },
-    desc: '一等奖',
+    desc: '人气TOP1作品',
     isShow: true,
     isUsed: false,
     frequency: 1,
@@ -204,21 +204,21 @@ export const defaultPrizeList = <IPrizeConfig[]>[
 ]
 export const defaultCurrentPrize = <IPrizeConfig>{
   id: '001',
-  name: '三等奖',
+  name: '人气TOP3作品',
   sort: 1,
   isAll: false,
   count: 12,
   isUsedCount: 0,
   picture: {
     id: '2',
-    name: '三等奖',
+    name: '人气TOP3作品',
     url: 'https://cos.douyigkg.com/lottery/202503-TOP3.jpg',
   },
   separateCount: {
     enable: true,
     countList: [],
   },
-  desc: '三等奖',
+  desc: '人气TOP3作品',
   isShow: true,
   isUsed: false,
   frequency: 1,
@@ -254,17 +254,17 @@ export const defaultTemporaryPrize = <IPrizeConfig>{
 export const defaultImageList = [
   {
     id: '0',
-    name: '一等奖',
+    name: '人气TOP1作品',
     url: 'https://cos.douyigkg.com/lottery/202503-TOP1.jpg',
   },
   {
     id: '1',
-    name: '二等奖',
+    name: '人气TOP2作品',
     url: 'https://cos.douyigkg.com/lottery/202503-TOP2.jpg',
   },
   {
     id: '2',
-    name: '三等奖',
+    name: '人气TOP3作品',
     url: 'https://cos.douyigkg.com/lottery/202503-TOP3.jpg',
   },
   // {
