@@ -248,7 +248,7 @@ onMounted(() => {
             >
               <div
                 v-if="item.isShow"
-                class="relative flex flex-row items-center justify-between w-64 h-24 px-2 shadow-xl card rounded-md"
+                class="relative flex flex-row items-center justify-between w-72 h-24 px-2 shadow-xl card rounded-md"
               >
                 <figure class="w-20 h-20 rounded-xl m-0">
                   <ImageSync v-if="item.picture.url" :img-item="item.picture" />
@@ -260,7 +260,7 @@ onMounted(() => {
                 <div class="items-center p-0 text-center card-body">
                   <div class="tooltip tooltip-left" :data-tip="item.name">
                     <h2
-                      class="w-24 p-0 m-0 overflow-hidden text-center card-title whitespace-nowrap text-ellipsis"
+                      class="w-36 p-0 m-0 overflow-hidden text-center card-title whitespace-nowrap text-ellipsis"
                     >
                       {{ item.name }}
                     </h2>
